@@ -124,7 +124,7 @@ Only the subclasses will be listed in the ``suite()``.
 If the base class inherits from ``unittest.TestCase`` the tests in the base class will be executed even though it is likely that conditions are such that the tests will fail.
 One solution to this problem is for the base class not to inherit from ``unittest.TestCase`` and to have the test subclasses themselves inherit from both the base class and the test base class.
 
-It is also important that tests are skipped explicitly using the ``unittest`` skipping feature rather than the test not being run without comment (which can be interpreted as a pass).
+It is also important that tests are skipped explicitly using the ``unittest`` skipping feature (such as raising ``unittest.SkipTest`` in the ``setup()`` phase, or using the ``@unittest.skipUnless`` decorator) rather than the test not being run without comment (which can be interpreted as a pass).
 Skipping statistics are very important and large numbers of skipping tests can be indicative of a wider issue with the test suite.
 
 One final comment is that the tests executed by pytest will not be in the same namespace as when they are run from the command line with Python.
@@ -132,6 +132,28 @@ If tests rely on knowing their own namespace they should use ``__name__`` rather
 
 Memory Test
 -----------
+
+Every LSST test file includes the ``utilsTests.MemoryTestCase`` test for leaked resources in the C++ code.
+This is the final test run from within each file and it relies on the ``utilsTests.init()`` method being called before any of the tests start.
+In the current system this reset occurs when ``suite()`` is called before being passed to the test runner.
+Pytest test discovery works by finding all the tests to be invoked first, and then running them so pytest must be configured to reset the memory leak counter before test classes are executed.
+This can be done by adding the following to the top of the test file:
+
+.. code-block:: python
+
+   def setup_module(module):
+       tests.init()
+
+Making the memory test itself available to pytest can be achieved by adding it explicitly at the end of the test file as the final test class:
+
+.. code-block:: python
+
+   class MyMemoryTestCase(tests.MemoryTestCase):
+       pass
+
+This will then be run once the other tests in that file have been run.
+As an additional protection, when the tests complete the leak counter is reset to allow new test files to start from a blank slate.
+Despite that, it is safer to be explicit and call ``lsst.utils.tests.init()`` in the ``setup_module()`` function.
 
 Cleaning up persistent state
 ----------------------------
@@ -146,3 +168,25 @@ When testing after migration to pytest please ensure that the tests run in a sin
 .. code-block:: shell
 
    $ py.test tests/*.py
+
+and that the test file order does not matter:
+
+.. code-block:: shell
+
+   $ py.test `ls -r tests/*.py`
+
+In many cases this will trigger unexpected failures in tests that work standalone or even in conjunction with some, not all, of the other tests.
+These problems can be due to tests setting global state and not resetting it, or tests not correctly releasing resources (for example running out of file handles).
+In extreme cases this could be indicative of memory corruption issues in the C++ code.
+
+Remove the suites
+-----------------
+
+Once the tests have been modified to support standard test discovery the suite handling boilerplate can be removed and replaced with:
+
+.. code-block:: python
+
+   if __name__ == "__main__":
+       unittest.main()
+
+Whilst it will then be possible to run the tests using ``python`` directly, the advice is that tests should be executed by ``py.test`` if at all possible, to emulate the CI environment.
