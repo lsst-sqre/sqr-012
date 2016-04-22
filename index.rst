@@ -40,7 +40,7 @@
 :tocdepth: 1
 
 The standard for `Python unit testing in LSST <http://developer.lsst.io/en/latest/coding/unit_test_policy.html>`_ is to use the ``unittest`` package.
-LSST unit tests do not use the standard ``unittest`` test discovery mechanism but instead specify a list of explicit test classes by specifying a ``suite`` using the following boilerplate:
+LSST unit tests do not use the standard ``unittest`` test discovery mechanism but instead convention is to specify a list of explicit test classes by specifying a ``suite`` using the following boilerplate:
 
 .. code-block:: python
 
@@ -69,6 +69,8 @@ Tests are set up like this to allow tests to be disabled by commenting out a sin
 The memory test case is used to check for memory leaks in the C++ code and the ``tests.init()`` call is there to initialize the memory tester.
 The ``run()`` method ensures that tests can exit with bad exit status if they fail, making it possible for ``sconsUtils`` to determine whether a particular test file passed or failed.
 
+``sconsUtils`` testing works as follows: the ``tests`` directory is scanned looking for executable binaries and Python scripts; binaries are executed directly and Python scripts are executed using the ``python`` binary in the path; the exit status from this call determines whether the test passes or fails; the output from the tests is redirected to a file in a ``.tests`` subdirectory using the test name as the name of the output file and if the test failed ``.failed`` is appended to the filename; if ``scons`` finds any ``.failed`` files the ``test`` target itself fails and ``scons`` aborts the build.
+
 Test Runners
 ============
 
@@ -78,10 +80,10 @@ To do this a test runner environment is required such as `nose <https://github.c
 Following the lead of `Astropy <http://www.astropy.org>`_ LSST is migrating away from a simple exit status approach to test running and switching to use pytest.
 Pytest provides a very flexible testing environment and is much simpler to use than ``unittest`` itself.
 At this time we are not proposing that ``unittest`` be dropped to make use of these testing simplifications and new tests should not be written relying solely on pytest.
-We are proposing to switch to using pytest as the test runner.
+We are switching to using pytest as the test runner.
 
-Pytest uses the standard ``unittest`` test discovery mechanism which results in the ``suite`` boilerplate described above being bypassed when the test file is executed via ``py.test``.
-Alternative mechanisms must be used to ensure that the tests are all executed.
+Pytest can use the standard ``unittest`` test discovery mechanism which results in the ``suite`` boilerplate described above being bypassed when the test file is executed via ``py.test``.
+The LSST test files must therefore be vetted to ensure that the tests function with automated test discovery and result in all tests being executed.
 
 Supporting pytest
 =================
