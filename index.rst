@@ -157,6 +157,45 @@ This will then be run once the other tests in that file have been run.
 As an additional protection, when the tests complete the leak counter is reset to allow new test files to start from a blank slate.
 Despite that, it is safer to be explicit and call ``lsst.utils.tests.init()`` in the ``setup_module()`` function.
 
+Testing Binaries
+----------------
+
+To enable a switch to pytest for all LSST testing, executable binaries must be tested from a Python wrapper.
+The ``lsst.utils.tests`` package provides a simple means of doing this by providing a base test case class that can automatically discover binary executables and create a test for each one.
+To enable this feature copy ``$UTILS_DIR/tests/testBinaries.py`` to the ``tests`` directory of your application.
+In many cases this will just work, but it is also possible to restrict the testing to an explicit list of binaries.
+For example:
+
+.. code-block:: python
+
+   import unittest
+   import lsst.utils.tests as utilsTests
+
+   class UtilsBinaryTester(utilsTests.BinariesTestCase):
+       pass
+
+   BINARIES = ("binary1", "binary2")
+   UtilsBinaryTester.discover_tests(__file__, BINARIES)
+
+   if __name__ == "__main__":
+       unittest.main()
+
+by explicitly listing the test binaries in a tuple.
+The tuple of binaries can contain any executable that can be run from the shell and will return zero exit status if it works and non-zero if it fails.
+The output from the test binary is captured.
+
+In some cases, explicit tests should be written for each binary executable, such as when a test should be skipped if some precondition is not met.
+In that case use can be made of the ``assertExecutable()`` method available in the ``BinariesTestCase`` class:
+
+.. code-block:: python
+
+   def testBinary(self):
+       self.assertExecutable("binary1",
+                             root_dir=os.path.dirname(__file__))
+
+The optional second argument is required to allow the test to run regardless of the working directory from which the test is invoked.
+In this case ``binary1`` would be located relative to the testing Python wrapper.
+
 Cleaning up persistent state
 ----------------------------
 
