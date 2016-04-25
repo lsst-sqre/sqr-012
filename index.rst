@@ -160,7 +160,7 @@ Despite that, it is safer to be explicit and call ``lsst.utils.tests.init()`` in
 Testing Binaries
 ----------------
 
-To enable a switch to pytest for all LSST testing, executable binaries must be tested from a Python wrapper.
+To enable a switch to pytest for all LSST testing, executable test binaries that have been built by the ``sconsUtils`` test target must be tested from a Python wrapper rather than being executed by ``sconsUtils`` directly.
 The ``lsst.utils.tests`` package provides a simple means of doing this by providing a base test case class that can automatically discover binary executables and create a test for each one.
 To enable this feature copy ``$UTILS_DIR/tests/testBinaries.py`` to the ``tests`` directory of your application.
 In many cases this will just work, but it is also possible to restrict the testing to an explicit list of binaries.
@@ -181,7 +181,7 @@ For example:
        unittest.main()
 
 by explicitly listing the test binaries in a tuple.
-The tuple of binaries can contain any executable that can be run from the shell and will return zero exit status if it works and non-zero if it fails.
+The tuple of binaries can contain any executable that can be run from the shell which will return zero exit status if it works and non-zero if it fails.
 The output from the test binary is captured.
 
 In some cases, explicit tests should be written for each binary executable, such as when a test should be skipped if some precondition is not met.
@@ -216,8 +216,8 @@ and that the test file order does not matter:
 
    $ py.test `ls -r tests/*.py`
 
-In many cases this will trigger unexpected failures in tests that work standalone or even in conjunction with some, not all, of the other tests.
-These problems can be due to tests setting global state and not resetting it, or tests not correctly releasing resources (for example running out of file handles).
+In many cases this will trigger unexpected failures in tests that work standalone or even in conjunction with some, but not all, of the other tests.
+These problems can be due to tests setting global state, in particular environment variables, and not resetting it, or tests not correctly releasing resources (for example running out of file handles).
 In extreme cases this could be indicative of memory corruption issues in the C++ code.
 
 Remove the suites
