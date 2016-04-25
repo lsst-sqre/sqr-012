@@ -40,7 +40,7 @@
 :tocdepth: 1
 
 The standard for `Python unit testing in LSST <http://developer.lsst.io/en/latest/coding/unit_test_policy.html>`_ is to use the ``unittest`` package.
-LSST unit tests do not use the standard ``unittest`` test discovery mechanism but instead convention is to specify a list of explicit test classes by specifying a ``suite`` using the following boilerplate:
+LSST unit tests do not currently use the builtin ``unittest`` test discovery mechanism but instead the convention is to specify a list of explicit test classes by specifying a ``suite`` using the following boilerplate:
 
 .. code-block:: python
 
