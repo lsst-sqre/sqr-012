@@ -44,29 +44,29 @@ LSST unit tests do not currently use the builtin ``unittest`` test discovery mec
 
 .. code-block:: python
 
-   import lsst.utils.tests as tests
+   import lsst.utils.tests
 
    <Test classes here subclasses of lsst.utils.tests.TestCase or unittest.TestCase>
 
    def suite():
        """Returns a suite containing all the test cases in this module."""
-       tests.init()
+       lsst.utils.tests.init()
 
        suites = []
        suites += unittest.makeSuite(FootprintSetTestCase)
        suites += unittest.makeSuite(PeaksInFootprintsTestCase)
-       suites += unittest.makeSuite(tests.MemoryTestCase)
+       suites += unittest.makeSuite(lsst.utils.tests.MemoryTestCase)
        return unittest.TestSuite(suites)
 
    def run(shouldExit=False):
        """Run the tests"""
-       tests.run(suite(), shouldExit)
+       lsst.utils.tests.run(suite(), shouldExit)
 
    if __name__ == "__main__":
        run(True)
 
 Tests are set up like this to allow tests to be disabled by commenting out a single line, and also to allow the memory test to be included in every test file.
-The memory test case is used to check for memory leaks in the C++ code and the ``tests.init()`` call is there to initialize the memory tester.
+The memory test case is used to check for memory leaks in the C++ code and the ``lsst.utils.tests.init()`` call is there to initialize the memory tester.
 The ``run()`` method ensures that tests can exit with bad exit status if they fail, making it possible for ``sconsUtils`` to determine whether a particular test file passed or failed.
 
 ``sconsUtils`` testing works as follows: the ``tests`` directory is scanned looking for executable binaries and Python scripts; binaries are executed directly and Python scripts are executed using the ``python`` binary in the path; the exit status from this call determines whether the test passes or fails; the output from the tests is redirected to a file in a ``.tests`` subdirectory using the test name as the name of the output file and if the test failed ``.failed`` is appended to the filename; if ``scons`` finds any ``.failed`` files the ``test`` target itself fails and ``scons`` aborts the build.
@@ -135,8 +135,8 @@ If tests rely on knowing their own namespace they should use ``__name__`` rather
 Memory Test
 -----------
 
-Every LSST test file includes the ``utilsTests.MemoryTestCase`` test for leaked resources in the C++ code.
-This is the final test run from within each file and it relies on the ``utilsTests.init()`` method being called before any of the tests start.
+Every LSST test file includes the ``lsst.utils.tests.MemoryTestCase`` test for leaked resources in the C++ code.
+This is the final test run from within each file and it relies on the ``lsst.utils.tests.init()`` method being called before any of the tests start.
 In the current system this reset occurs when ``suite()`` is called before being passed to the test runner.
 Pytest test discovery works by finding all the tests to be invoked first, and then running them so pytest must be configured to reset the memory leak counter before test classes are executed.
 This can be done by adding the following to the top of the test file:
@@ -144,13 +144,13 @@ This can be done by adding the following to the top of the test file:
 .. code-block:: python
 
    def setup_module(module):
-       tests.init()
+       lsst.utils.tests.init()
 
 Making the memory test itself available to pytest can be achieved by adding it explicitly at the end of the test file as the final test class:
 
 .. code-block:: python
 
-   class MyMemoryTestCase(tests.MemoryTestCase):
+   class MyMemoryTestCase(lsst.utils.tests.MemoryTestCase):
        pass
 
 This will then be run once the other tests in that file have been run.
@@ -169,9 +169,9 @@ For example:
 .. code-block:: python
 
    import unittest
-   import lsst.utils.tests as utilsTests
+   import lsst.utils.tests
 
-   class UtilsBinaryTester(utilsTests.BinariesTestCase):
+   class UtilsBinaryTester(lsst.utils.tests.BinariesTestCase):
        pass
 
    BINARIES = ("binary1", "binary2")
