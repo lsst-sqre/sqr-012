@@ -155,14 +155,14 @@ Making the memory test itself available to pytest can be achieved by adding it e
 
 This will then be run once the other tests in that file have been run.
 As an additional protection, when the tests complete the leak counter is reset to allow new test files to start from a blank slate.
-Despite that, it is safer to be explicit and call ``lsst.utils.tests.init()`` in the ``setup_module()`` function.
+It is recommended to be explicit and call ``lsst.utils.tests.init()`` in the ``setup_module()`` function.
 
 Testing Binaries
 ----------------
 
 To enable a switch to pytest for all LSST testing, executable test binaries that have been built by the ``sconsUtils`` test target must be tested from a Python wrapper rather than being executed by ``sconsUtils`` directly.
 The ``lsst.utils.tests`` package provides a simple means of doing this by providing a base test case class that can automatically discover binary executables and create a test for each one.
-To enable this feature copy ``$UTILS_DIR/tests/testBinaries.py`` to the ``tests`` directory of your application.
+To enable this feature copy ``$UTILS_DIR/tests/testExecutables.py`` to the ``tests`` directory of your application.
 In many cases this will just work, but it is also possible to restrict the testing to an explicit list of binaries.
 For example:
 
@@ -171,30 +171,31 @@ For example:
    import unittest
    import lsst.utils.tests
 
-   class UtilsBinaryTester(lsst.utils.tests.BinariesTestCase):
+   class UtilsBinaryTester(lsst.utils.tests.ExecutablesTestCase):
        pass
 
-   BINARIES = ("binary1", "binary2")
-   UtilsBinaryTester.discover_tests(__file__, BINARIES)
+   EXES = ("binary1", "binary2")
+   UtilsBinaryTester.discover_tests(__file__, EXES)
 
    if __name__ == "__main__":
        unittest.main()
 
-by explicitly listing the test binaries in a tuple.
-The tuple of binaries can contain any executable that can be run from the shell which will return zero exit status if it works and non-zero if it fails.
-The output from the test binary is captured.
+by explicitly listing the test executables in a tuple.
+The tuple of executables can contain any executable that can be run from the shell which will return zero exit status if it works and non-zero if it fails.
+The output from the test executable is captured.
 
-In some cases, explicit tests should be written for each binary executable, such as when a test should be skipped if some precondition is not met.
-In that case use can be made of the ``assertExecutable()`` method available in the ``BinariesTestCase`` class:
+In some cases, explicit tests should be written for each executable, such as when a test should be skipped if some precondition is not met or if some command-line arguments need to be given.
+In that case use can be made of the ``assertExecutable()`` method available in the ``ExecutablesTestCase`` class:
 
 .. code-block:: python
 
    def testBinary(self):
-       self.assertExecutable("binary1",
+       self.assertExecutable("binary1", args=None,
                              root_dir=os.path.dirname(__file__))
 
 The optional second argument is required to allow the test to run regardless of the working directory from which the test is invoked.
 In this case ``binary1`` would be located relative to the testing Python wrapper.
+The ``args`` optional keyword parameter can be used to supply a list of arguments to the executable.
 
 Cleaning up persistent state
 ----------------------------
@@ -228,6 +229,8 @@ Once the tests have been modified to support standard test discovery the suite h
 .. code-block:: python
 
    if __name__ == "__main__":
+       lsst.utils.tests.init()
        unittest.main()
 
-Whilst it will then be possible to run the tests using ``python`` directly, the advice is that tests should be executed by ``py.test`` if at all possible, to emulate the CI environment.
+Where the ``lsst.utils.tests.init()`` is only needed for tests that include the ``MemoryTestCase``.
+It will then be possible to run the tests using ``python`` directly, but the recommendation is that tests should be executed by ``py.test`` if at all possible, to emulate the CI environment.
