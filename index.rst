@@ -118,6 +118,7 @@ Possible issues are:
 
 * A routine exists in the file with a ``test`` prefix but is not itself a test.
 * The ``suite()`` does not list all the test classes that are in the file.
+* A class is named with a ``Test`` prefix (but does not inherit from ``unittest.TestCase``) and ``pytest`` may issue warnings if no tests can be found or if an ``__init__`` method is present (usually these are not meant to be treated as tests but ``pytest`` does not know that; rename the class to fix this).
 * Tests in a base class are being run inadvertently.
 
 The issue of base classes needs some explanation.
