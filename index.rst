@@ -89,7 +89,7 @@ Supporting pytest
 =================
 
 In many cases the tests will run properly with ``py.test`` with no modifications, although the memory test case will not be executed.
-``unittest`` test discovery is based on the presence of classes inherited from ``unittest.TestCase`` containing methods that begin with the string ``test``.
+``unittest`` test discovery is based on the presence of classes inherited from ``unittest.TestCase``, including subclasses of ``lsst.utils.tests.TestCase``, containing methods that begin with the string ``test``.
 The simplest way to determine what changes are required is to run the test once using ``python`` and once using ``py.test``:
 
 .. code-block:: shell
@@ -97,7 +97,7 @@ The simplest way to determine what changes are required is to run the test once 
    $ python tests/statistics.py
    .........................
    ----------------------------------------------------------------------
-   Ran 25 tests in 0.149s
+   Ran 26 tests in 0.149s
 
    OK
    $ py.test tests/statistics.py
@@ -110,8 +110,8 @@ The simplest way to determine what changes are required is to run the test once 
 
    ========================== 24 passed in 0.64 seconds ===========================
 
-Here it is clear that 24 tests ran instead of 25.
-This is expected because the memory test case will not be "discovered" because it is hidden in the ``suite()`` definition.
+Here it is clear that 24 tests ran instead of 26.
+This is expected because the, currently 2, resource leak test cases will not be "discovered" because they are hidden in the ``suite()`` definition.
 
 If the test counts differ by more than one, or if they match, then more work may be required.
 Possible issues are:
