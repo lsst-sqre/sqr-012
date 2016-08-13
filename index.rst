@@ -39,8 +39,16 @@
 
 :tocdepth: 1
 
-The standard for `Python unit testing in LSST <http://developer.lsst.io/en/latest/coding/unit_test_policy.html>`_ is to use the ``unittest`` package.
-LSST unit tests do not currently use the builtin ``unittest`` test discovery mechanism but instead the convention is to specify a list of explicit test classes by specifying a ``suite`` using the following boilerplate:
+.. note::
+   This document explains how to migrate from old-style LSST Python tests that use a ``suite`` -based approach and custom test runner from the :lmod:`lsst.utils` package.
+   If you are interesting in writing new tests or learning the current policies for Python testing please refer to the `LSST developer guide <https://developer.lsst.io/coding/python_testing.html>`_.
+
+The standard for `Python unit testing in LSST <http://developer.lsst.io/en/latest/coding/python_testing.html>`_ is to use the ``unittest`` package.
+Older versions of the coding standard did not use the builtin ``unittest`` test discovery mechanism but instead the convention was to specify a list of explicit test classes by specifying a ``suite``.
+This document explains how to migrate the tests from this legacy approach to a scheme that supports the ``py.test`` test runner.
+A fully worked example describing the new scheme can be found :ref:`later in this document <pytest-complete>`.
+
+If your test file has the following boilerplate in it, you should read this document to learn how to convert it to be ``py.test`` - compatible:
 
 .. code-block:: python
 
@@ -225,3 +233,19 @@ Once the tests have been modified to support standard test discovery the suite h
 
 Where the ``lsst.utils.tests.init()`` is only needed for tests that include the ``MemoryTestCase``.
 It will then be possible to run the tests using ``python`` directly, but the recommendation is that tests should be executed by ``py.test`` if at all possible, to emulate the CI environment.
+
+Putting it all together
+-----------------------
+
+.. _pytest-complete:
+
+With all the changes described above your test files should be simpler.
+An example test file should look something like this:
+
+.. literalinclude:: snippets/unittest_runner_example.py
+   :linenos:
+   :language: python
+
+The Python packages are loaded at the top and then all the tests are defined.
+At the end there is code to initialize the memory leak tester in ``py.test`` and when running from the command line.
+If you are not using any LSST C++ code then the test will simply have the :func:`unittest.main` call at the end.
