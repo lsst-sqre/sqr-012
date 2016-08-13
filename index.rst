@@ -167,19 +167,9 @@ To enable this feature copy ``$UTILS_DIR/tests/testExecutables.py`` to the ``tes
 In many cases this will just work, but it is also possible to restrict the testing to an explicit list of binaries.
 For example:
 
-.. code-block:: python
-
-   import unittest
-   import lsst.utils.tests
-
-   class UtilsBinaryTester(lsst.utils.tests.ExecutablesTestCase):
-       pass
-
-   EXES = ("binary1", "binary2")
-   UtilsBinaryTester.discover_tests(__file__, EXES)
-
-   if __name__ == "__main__":
-       unittest.main()
+.. literalinclude:: snippets/testExecutables.py
+   :linenos:
+   :language: python
 
 by explicitly listing the test executables in a tuple.
 The tuple of executables can contain any executable that can be run from the shell which will return zero exit status if it works and non-zero if it fails.
