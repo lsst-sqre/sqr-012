@@ -243,7 +243,6 @@ With all the changes described above your test files should be simpler.
 An example test file should look something like this:
 
 .. literalinclude:: snippets/unittest_runner_example.py
-   :linenos:
    :language: python
 
 The Python packages are loaded at the top and then all the tests are defined.

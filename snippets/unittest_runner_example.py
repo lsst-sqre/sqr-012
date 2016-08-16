@@ -20,3 +20,4 @@ def setup_module(module):
 if __name__ == "__main__":
     lsst.utils.tests.init()
     unittest.main()
+
